@@ -1,0 +1,24 @@
+{
+  "name": "ghost-gs",
+  "version": "1.0.0",
+  "description": "Google Storage provider for ghost",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/willhackett/ghost-gs.git"
+  },
+  "keywords": [
+    "ghost",
+    "storage",
+    "google"
+  ],
+  "author": "Will Hackett <http://github.com/willhackett>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/willhackett/ghost-gs/issues"
+  },
+  "homepage": "https://github.com/willhackett/ghost-gs#readme"
+}
