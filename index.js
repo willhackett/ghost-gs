@@ -1,105 +1,86 @@
-'use strict';
+// # Local File System Image Storage module
+// The (default) module for storing images, using the local file system
 
-var fs          = require('fs');
-var path        = require('path');
-var Promise     = require('bluebird');
-var gcloud      = require('google-cloud');
-var errors      = require('../../core/server/errors');
-var BaseStorage = require('../../core/server/storage/base');
-var options     = {};
-var service,
-    assetHost,
-    bucket;
+var util = require('util'),
+    Promise = require('bluebird'),
+    errors = require('../../core/server/errors'),
+    BaseStore = require('../../core/server/storage/base'),
+    gcloud = require('google-cloud');
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function GhostGS(config) {
+    BaseStore.call(this);
 
-
-function GStore(config) {
-    options = config || {};
-
-    service = gcloud.storage({
-        projectId: options.projectId,
-        keyFilename: options.keyFilename
+    var googleCloudService = gcloud.storage({
+      projectId: config.projectId,
+      keyFilename: config.keyFilename
     });
 
-    assetHost = 'bucketPath' in options ? options.assetHost ? 'https://' + options.bucket + '.storage.googleapis.com/';
-    bucket = service.bucket(options.bucket);
+    this.config = config;
+    this.config.hostname = this.config.hostname || 'https://' + this.config.bucket + '.storage.googleapis.com/';
+    this.bucket = googleCloudService.bucket(this.config.bucket);
+    this.bucket.acl.default.add({
+      entity: 'allUsers',
+      role: googleCloudService.acl.OWNER_ROLE
+    }, function(error, aclObject) {
+      if (error) throw new Error(error);
+    });
 }
 
-_inherits(GStore, baseStore);
+util.inherits(GhostGS, BaseStore);
 
-GStore.prototype.save = function(image, targetDir) {
-  var self = this;
-  if (image.path === null || image.name === null) {
-    Promise.reject('Image object is invalid');
-  }
-  var targetDir = targetDir || this.getTargetDir(),
+GhostGS.prototype.save = function (image, targetDir) {
+  var self = this,
       targetFileName;
 
-    return this.getUniqueFileName(this, image, targetDir).then(function (uniqueFileName) {
-        targetFileName = uniqueFileName;
-        return new Promise(function(resolve, reject) {
-            bucket.upload(image.path, { destination: targetDir + targetFileName }, function(error, resp) {
-                if(err) reject(err);
-                resolve(resp);
-            });
-        });
-    }).then(function(file){
-        return new Promise(function(resolve, reject) {
-            file.makePublic(function(err, apiResponse) {
-                if(err) {
-                    reject(err);
-                    return;
-                }
-                resolve();
-                return;
-            });
-        });
-    }).then(function () {
-        return assetHost + targetDir + targetFilename;
-    }).catch(function (e) {
-        errors.logError(e);
-        return Promise.reject(e);
-    });
-};
+  targetDir = targetDir || this.getTargetDir();
 
-/**
- * Serve() is a no-op pass through the middleware
- * @return {void}
- */
-GStore.prototype.serve = function() {
-    return function (req, res, next) {
-      next(); // We're not serving anything, so we're just gonna skip!
+  return this.getUniqueFileName(this, image, targetDir)
+  .then(function(filename) {
+    targetFileName = filename;
+    var options = {
+      destination: filename
     };
-};
-
-/**
- * @param  {String} filename [whole filename including directory path]
- * @return {Promise}         [return boolean value after fulfilled]
- */
-GStore.prototype.exists = function (filename) {
-  var file = this.bucket.file(filename);
-  return new Promise(function (resolve, reject) {
-    file.exists(function (error, resp) {
-      if (error) reject(error);
-      resolve(exists);
+    return new Promise(function(resolve, reject) {
+      this.bucket.upload(image.path, options, function(error, response) {
+        if (error) reject(error);
+        resolve(response);
+      });
     });
+  })
+  .then(function() {
+    return this.config.hostname + targetDir + targetFilename;
+  })
+  .catch(function(e) {
+    errors.logError(e);
+    return Promise.reject(e);
   });
 };
 
-/**
- * @param  {String} filename [whole filename including directory path]
- * @return {Promise}         [return boolean value after fulfilled]
- */
-GStore.prototype.delete = function (filename) {
-  var file = this.bucket.file(filename);
-  return new Promise(function (resolve, reject) {
-    file.delete(function (error, resp) {
+GhostGS.prototype.exists = function (fileName) {
+  var file = this.bucket.file(fileName);
+  return new Promise(function(resolve, reject) {
+    file.exists(function(error, resp) {
       if (error) reject(error);
       resolve(resp);
     });
   });
 };
 
+// no-op so we just skip
+GhostGS.prototype.serve = function () {
+  return function (req, res, next) {
+    next();
+  };
+};
 
-module.exports = GStore;
+GhostGS.prototype.delete = function (fileName) {
+  var file = this.bucket.file(fileName);
+  return new Promise(function(resolve, reject) {
+    file.delete(function(error, resp) {
+      if (error) reject(error);
+      resolve(resp);
+    });
+  });
+};
+
+module.exports = GhostGS;
