@@ -22,7 +22,10 @@ function GhostGS(config) {
       entity: 'allUsers',
       role: googleCloudService.acl.OWNER_ROLE
     }, function(error, aclObject) {
-      if (error) throw new Error(error);
+      if (error) {
+        errors.logError(error);
+        return Promise.reject(error);
+      }
     });
 }
 
