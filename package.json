@@ -20,5 +20,9 @@
   "bugs": {
     "url": "https://github.com/willhackett/ghost-gs/issues"
   },
-  "homepage": "https://github.com/willhackett/ghost-gs#readme"
+  "homepage": "https://github.com/willhackett/ghost-gs#readme",
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "google-cloud": "^0.39.0"
+  }
 }
