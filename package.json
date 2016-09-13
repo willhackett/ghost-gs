@@ -1,6 +1,6 @@
 {
   "name": "ghost-gs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Google Storage provider for ghost",
   "main": "index.js",
   "scripts": {

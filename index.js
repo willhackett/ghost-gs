@@ -44,14 +44,14 @@ GhostGS.prototype.save = function (image, targetDir) {
       destination: filename
     };
     return new Promise(function(resolve, reject) {
-      this.bucket.upload(image.path, options, function(error, response) {
+      self.bucket.upload(image.path, options, function(error, response) {
         if (error) reject(error);
         resolve(response);
       });
     });
   })
   .then(function() {
-    return this.config.hostname + targetDir + targetFilename;
+    return self.config.hostname + targetDir + targetFilename;
   })
   .catch(function(e) {
     errors.logError(e);
