@@ -1,6 +1,6 @@
 {
   "name": "ghost-gs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Google Storage provider for ghost",
   "main": "index.js",
   "scripts": {
@@ -22,8 +22,8 @@
   },
   "homepage": "https://github.com/willhackett/ghost-gs#readme",
   "dependencies": {
+    "@google-cloud/storage": "^0.1.1",
     "bluebird": "^3.4.6",
-    "google-cloud": "^0.39.0",
     "util": "^0.10.3"
   }
 }

@@ -23,3 +23,8 @@ Ghost Google Storage
     }
 },
 ```
+
+## Changes
+
+1.0.0 - Initial release.
+1.0.1 - Switched out `google-cloud` dependency for much smaller `@google-cloud/storage` specific.

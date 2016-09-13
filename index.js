@@ -5,12 +5,12 @@ var util = require('util'),
     Promise = require('bluebird'),
     errors = require('../../core/server/errors'),
     BaseStore = require('../../core/server/storage/base'),
-    gcloud = require('google-cloud');
+    storage = require('@google-cloud/storage');
 
 function GhostGS(config) {
     BaseStore.call(this);
 
-    var googleCloudService = gcloud.storage({
+    var googleCloudService = storage({
       projectId: config.projectId,
       keyFilename: config.keyFilename
     });
